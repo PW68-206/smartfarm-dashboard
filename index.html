@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Smart Farm Online · PW68-206</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js"></script>
+  <style>
+    :root{--green:#167447;--green2:#1e9d5d;--ink:#173629;--muted:#688074;--line:#d8e5dd;--bg:#eef6f1;--red:#d94343;--amber:#d98a16}
+    *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf7f1,#f7fbf9);color:var(--ink);font-family:system-ui,"Noto Sans Thai",sans-serif}.wrap{max-width:1180px;margin:auto;padding:22px}.top{background:linear-gradient(135deg,#145d3b,#228c57);color:white;padding:25px;border-radius:22px;box-shadow:0 12px 32px #155d3b26;display:flex;gap:18px;align-items:center;justify-content:space-between}.top h1{margin:0;font-size:28px}.top p{margin:5px 0 0;opacity:.86}.badge{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:99px;background:#ffffff26;font-weight:800}.dot{width:11px;height:11px;border-radius:50%;background:#ccc}.dot.on{background:#61e39b;box-shadow:0 0 0 5px #61e39b25}.login,.section{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 8px 22px #204b3210}.login{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}.field label{display:block;color:var(--muted);font-size:13px;margin:0 0 6px}.field input{width:100%;border:1px solid #bdd2c5;border-radius:11px;padding:12px 13px;font-size:16px}.btn{border:0;border-radius:11px;padding:12px 20px;background:var(--green);color:#fff;font-weight:800;font-size:15px;cursor:pointer}.btn:disabled{opacity:.55}.note{grid-column:1/-1;color:var(--muted);font-size:13px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:16px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 22px #204b3210}.label{font-size:14px;color:var(--muted)}.value{font-size:31px;font-weight:900;color:var(--green);margin-top:4px}.unit{font-size:14px;font-weight:700;color:var(--muted)}h2{font-size:19px;margin:0 0 14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.data{background:#f5faf7;border-radius:12px;padding:12px}.data b{display:block;font-size:19px;margin-top:3px}.relay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.relay{border:1px solid var(--line);border-radius:11px;padding:10px;font-weight:800}.relay.on{background:#e6f8ed;border-color:#4cab73;color:#12633b}.relay.off{color:#8a9991}.auto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.auto{background:#f5faf7;border-radius:12px;padding:12px}.auto span{display:block;color:var(--muted);font-size:13px}.auto b{font-size:16px}.warn{color:var(--red)!important}.hidden{display:none}.foot{text-align:center;color:var(--muted);font-size:12px;padding:22px}
+    @media(max-width:800px){.metrics{grid-template-columns:repeat(2,1fr)}.grid2{grid-template-columns:1fr}.login{grid-template-columns:1fr}.note{grid-column:auto}}@media(max-width:480px){.wrap{padding:12px}.top{align-items:flex-start;flex-direction:column}.top h1{font-size:23px}.metrics,.data-grid,.relay-grid,.auto-grid{grid-template-columns:1fr 1fr}.value{font-size:27px}}
+  </style>
+</head>
+<body>
+<main class="wrap">
+  <header class="top"><div><h1>Smart Farm Online</h1><p>โครงงานโรงเรือน Green Oak · ESP32 PW68-206</p></div><div class="badge"><i id="dot" class="dot"></i><span id="connection">ยังไม่เชื่อมต่อ</span></div></header>
+
+  <section class="login" id="loginBox">
+    <div class="field"><label>ชื่อผู้ใช้ Dashboard</label><input id="username" value="smartfarm_dashboard" autocomplete="username"></div>
+    <div class="field"><label>รหัสผ่าน MQTT</label><input id="password" type="password" autocomplete="current-password" placeholder="รหัสผ่าน smartfarm_dashboard"></div>
+    <button class="btn" id="connectBtn" onclick="connectMqtt()">เชื่อมต่อ</button>
+    <div class="note">รหัสผ่านใช้เชื่อมต่อจากเบราว์เซอร์ครั้งนี้เท่านั้น และไม่ได้บันทึกไว้ในหน้าเว็บหรือ GitHub</div>
+  </section>
+
+  <div id="dashboard" class="hidden">
+    <section class="metrics">
+      <div class="card"><div class="label">แสง BH1750</div><div class="value"><span id="lux">--</span> <span class="unit">lux</span></div></div>
+      <div class="card"><div class="label">ความชื้นแปลง Control</div><div class="value"><span id="soil1">--</span><span class="unit">%</span></div></div>
+      <div class="card"><div class="label">ความชื้นแปลง Non-control</div><div class="value"><span id="soil2">--</span><span class="unit">%</span></div></div>
+      <div class="card"><div class="label">กำลังไฟฟ้า</div><div class="value"><span id="watts">--</span> <span class="unit">W</span></div></div>
+    </section>
+
+    <section class="grid2">
+      <div class="section"><h2>เซนเซอร์ดิน ZTS-3002</h2><div class="data-grid">
+        <div class="data">อุณหภูมิ<b id="temp">-- °C</b></div><div class="data">ความชื้น<b id="zmoist">-- %</b></div><div class="data">EC<b id="ec">-- µS/cm</b></div>
+        <div class="data">pH<b id="ph">--</b></div><div class="data">N-P-K<b id="npk">-- / -- / --</b></div><div class="data">สถานะ<b id="ztsStatus">--</b></div>
+      </div></div>
+      <div class="section"><h2>ไฟฟ้าและอุปกรณ์</h2><div class="data-grid">
+        <div class="data">แรงดัน<b id="voltage">-- V</b></div><div class="data">กระแส<b id="current">-- A</b></div><div class="data">พลังงาน<b id="energy">-- kWh</b></div>
+        <div class="data">ถัง Mix<b id="mix">--</b></div><div class="data">โหมดระบบ<b id="mode">--</b></div><div class="data">ความปลอดภัย<b id="safety">--</b></div>
+      </div></div>
+    </section>
+
+    <section class="grid2">
+      <div class="section"><h2>Relay R2–R10</h2><div class="relay-grid" id="relays"></div></div>
+      <div class="section"><h2>ระบบอัตโนมัติ</h2><div class="auto-grid">
+        <div class="auto"><span>แปลง Non-control</span><b id="autoNc">--</b></div><div class="auto"><span>แปลง Control</span><b id="autoCtrl">--</b></div>
+        <div class="auto"><span>ระบบปุ๋ย</span><b id="autoFert">--</b></div><div class="auto"><span>ระบบม่าน</span><b id="autoCurt">--</b></div>
+      </div></div>
+    </section>
+  </div>
+  <div class="foot">ข้อมูลล่าสุด: <span id="lastUpdate">ยังไม่มีข้อมูล</span> · หน้านี้ใช้สำหรับดูสถานะเท่านั้น</div>
+</main>
+<script>
+const HOST='95a45c625a3a4147a36929d2a1c2d4c4.s1.eu.hivemq.cloud',PORT=8884,PATH='/mqtt';
+const STATUS='smartfarm/device01/status',AVAIL='smartfarm/device01/availability';
+const relayNames=['R2 P1','R3 P2','R4 V1','R5 V2','R6 V3','R7 V4','R8 V5','R9 เปิดม่าน','R10 ปิดม่าน'];
+let client,available=false;
+function txt(id,v){document.getElementById(id).textContent=v}
+function connection(text,on){txt('connection',text);document.getElementById('dot').classList.toggle('on',on)}
+function buildRelays(values=[]){document.getElementById('relays').innerHTML=relayNames.map((n,i)=>`<div class="relay ${values[i]?'on':'off'}">${n}<br>${values[i]?'ON':'OFF'}</div>`).join('')}
+buildRelays();
+function connectMqtt(){
+  const user=document.getElementById('username').value.trim(),pass=document.getElementById('password').value;
+  if(!user||!pass){alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน Dashboard');return}
+  document.getElementById('connectBtn').disabled=true;connection('กำลังเชื่อมต่อ...',false);
+  client=new Paho.MQTT.Client(HOST,PORT,PATH,'web-'+Math.random().toString(16).slice(2));
+  client.onConnectionLost=e=>{connection('การเชื่อมต่อขาด',false);document.getElementById('connectBtn').disabled=false};
+  client.onMessageArrived=onMessage;
+  client.connect({useSSL:true,userName:user,password:pass,timeout:10,keepAliveInterval:30,cleanSession:true,
+    onSuccess:()=>{client.subscribe(STATUS,{qos:0});client.subscribe(AVAIL,{qos:0});connection('เชื่อมต่อ Broker แล้ว',true);document.getElementById('dashboard').classList.remove('hidden');document.getElementById('password').value=''},
+    onFailure:e=>{connection('เชื่อมต่อไม่สำเร็จ',false);document.getElementById('connectBtn').disabled=false;alert('เชื่อมต่อไม่สำเร็จ: '+(e.errorMessage||'ตรวจชื่อผู้ใช้และรหัสผ่าน'))}
+  });
+}
+function onMessage(m){
+  if(m.destinationName===AVAIL){available=m.payloadString==='online';connection(available?'ESP32 ออนไลน์':'ESP32 ออฟไลน์',available);return}
+  if(m.destinationName!==STATUS)return;
+  try{const d=JSON.parse(m.payloadString);available=true;connection('ESP32 ออนไลน์',true);
+    txt('lux',d.light.valid?Number(d.light.lux).toLocaleString('th-TH'):'--');txt('soil1',d.soil.controlValid?d.soil.control:'--');txt('soil2',d.soil.nonControlValid?d.soil.nonControl:'--');txt('watts',d.power.valid?d.power.watts:'--');
+    txt('temp',d.zts.valid?d.zts.temperature+' °C':'--');txt('zmoist',d.zts.valid?d.zts.moisture+' %':'--');txt('ec',d.zts.valid?d.zts.ec+' µS/cm':'--');txt('ph',d.zts.valid?d.zts.ph:'--');txt('npk',d.zts.valid?`${d.zts.n} / ${d.zts.p} / ${d.zts.k}`:'-- / -- / --');txt('ztsStatus',d.zts.valid?'ออนไลน์':'ออฟไลน์');
+    txt('voltage',d.power.valid?d.power.voltage+' V':'--');txt('current',d.power.valid?d.power.current+' A':'--');txt('energy',d.power.valid?d.power.energy+' kWh':'--');txt('mix',({EMPTY:'น้ำหมด',LOW:'ระดับ LOW',FULL:'เต็ม',SENSOR_FAULT:'เซนเซอร์ผิดปกติ'})[d.contacts.mix]||d.contacts.mix);txt('mode',d.mode);txt('safety',d.safetyOk?'ปกติ':'FAULT');document.getElementById('safety').classList.toggle('warn',!d.safetyOk);
+    buildRelays(d.relays);txt('autoNc',d.auto.nonControl);txt('autoCtrl',d.auto.control);txt('autoFert',d.auto.fertilizer);txt('autoCurt',d.auto.curtain);txt('lastUpdate',new Date().toLocaleString('th-TH'));
+  }catch(e){console.error(e)}
+}
+</script>
+</body>
+</html>
