@@ -97,13 +97,14 @@
 
     <div class="page" id="page-events"><section class="section"><div class="diagram-head"><h2>ประวัติเหตุการณ์ล่าสุด</h2><button class="btn danger" onclick="controlCommand('auto','clear_events')">ล้างประวัติ</button></div><div id="eventList" class="events"><div class="event"><span>--</span><span>INFO</span><span>ยังไม่มีข้อมูล</span></div></div></section></div>
   </div>
-  <div class="foot">ข้อมูลล่าสุด: <span id="lastUpdate">ยังไม่มีข้อมูล</span> · Firmware: <span id="firmwareVersion">--</span> · Online Dashboard v7 · คำสั่งควบคุมส่งผ่าน MQTT TLS</div>
+  <div class="foot">ข้อมูลล่าสุด: <span id="lastUpdate">ยังไม่มีข้อมูล</span> · Firmware: <span id="firmwareVersion">--</span> · Online Dashboard v8 · คำสั่งควบคุมส่งผ่าน MQTT TLS</div>
 </main>
 <script>
 const HOST='95a45c625a3a4147a36929d2a1c2d4c4.s1.eu.hivemq.cloud',PORT=8884,PATH='/mqtt';
 const STATUS='smartfarm/device01/status',AVAIL='smartfarm/device01/availability',COMMAND='smartfarm/device01/command',ACK='smartfarm/device01/ack';
 const relayNames=['R2 P1','R3 P2','R4 V1','R5 V2','R6 V3','R7 V4','R8 V5','R9 เปิดม่าน','R10 ปิดม่าน'];
-let socket,available=false,compatible=false,pingTimer,connectTimer,connected=false,lastData=null,pending=new Map(),holdTimer=null,holdRelay=0,settingsLoaded=false,packetId=1;
+let socket,available=false,compatible=false,pingTimer,connectTimer,reconnectTimer,statusWatchdog,connected=false,lastData=null,pending=new Map(),holdTimer=null,holdRelay=0,settingsLoaded=false,packetId=1;
+let savedUser='',savedPass='',reconnectAttempt=0,lastBrokerActivity=0,autoReconnect=true;
 function txt(id,v){document.getElementById(id).textContent=v}
 function connection(text,on){txt('connection',text);document.getElementById('dot').classList.toggle('on',on)}
 function buildRelays(values=[]){document.getElementById('relays').innerHTML=relayNames.map((n,i)=>`<div class="relay ${values[i]?'on':'off'}">${n}<br>${values[i]?'ON':'OFF'}</div>`).join('')}
@@ -127,25 +128,39 @@ function nextPacketId(){packetId=packetId>=65535?1:packetId+1;return packetId}
 function publishPacket(topic,payload){const id=nextPacketId();return mqttPacket(0x32,joinBytes([mqttString(topic),new Uint8Array([id>>8,id&255]),encoder.encode(payload)]))}
 function connectPacket(user,pass){const flags=0xC2,keepAlive=30;const variable=joinBytes([mqttString('MQTT'),new Uint8Array([4,flags,keepAlive>>8,keepAlive&255])]);const payload=joinBytes([mqttString('web-'+crypto.getRandomValues(new Uint32Array(1))[0].toString(16)),mqttString(user),mqttString(pass)]);return mqttPacket(0x10,joinBytes([variable,payload]))}
 function subscribePacket(){const body=joinBytes([new Uint8Array([0,1]),mqttString('smartfarm/device01/#'),new Uint8Array([0])]);return mqttPacket(0x82,body)}
-function fail(message){clearTimeout(connectTimer);clearInterval(pingTimer);connected=false;compatible=false;connection(message,false);document.getElementById('connectBtn').disabled=false;for(const [id,p] of pending){clearTimeout(p.t);p.reject(Error('การเชื่อมต่อขาด'))}pending.clear()}
-function connectMqtt(){
-  const user=document.getElementById('username').value.trim(),pass=document.getElementById('password').value;
-  if(!user||!pass){alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน Dashboard');return}
+function rejectPending(){for(const [id,p] of pending){clearTimeout(p.t);p.reject(Error('การเชื่อมต่อขาด'))}pending.clear()}
+function scheduleReconnect(message,immediate=false){
+  clearTimeout(reconnectTimer);
+  if(!autoReconnect||!savedUser||!savedPass)return;
+  if(navigator.onLine===false){connection('อินเทอร์เน็ตของเครื่องนี้ออฟไลน์ · รอเชื่อมใหม่',false);return}
+  const delays=[2000,5000,10000,30000],delay=immediate?0:delays[Math.min(reconnectAttempt,delays.length-1)];
+  reconnectAttempt++;
+  connection(delay?`${message} · เชื่อมใหม่ใน ${Math.ceil(delay/1000)} วินาที`:'กำลังเชื่อมต่อใหม่...',false);
+  reconnectTimer=setTimeout(()=>connectMqtt(true),delay);
+}
+function fail(message,retry=true){clearTimeout(connectTimer);clearInterval(pingTimer);connected=false;available=false;compatible=false;document.getElementById('connectBtn').disabled=false;rejectPending();if(retry)scheduleReconnect(message);else connection(message,false)}
+function connectMqtt(automatic=false){
+  const user=automatic?savedUser:document.getElementById('username').value.trim(),pass=automatic?savedPass:document.getElementById('password').value;
+  if(!user||!pass){if(!automatic)alert('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน Dashboard');return}
+  if(!automatic){savedUser=user;savedPass=pass;reconnectAttempt=0;autoReconnect=true}
   document.getElementById('connectBtn').disabled=true;connection('กำลังเชื่อมต่อ...',false);
-  clearTimeout(connectTimer);clearInterval(pingTimer);connected=false;
-  try{if(socket&&socket.readyState<2)socket.close();socket=new WebSocket(`wss://${HOST}:${PORT}${PATH}`,'mqtt');socket.binaryType='arraybuffer';
-    socket.onopen=()=>socket.send(connectPacket(user,pass));
-    socket.onmessage=e=>parseMqtt(new Uint8Array(e.data));
-    socket.onerror=()=>fail('เปิด WebSocket ไม่สำเร็จ');
-    socket.onclose=()=>{if(connected)fail('การเชื่อมต่อขาด')};
-    connectTimer=setTimeout(()=>{if(!connected){socket.close();fail('เชื่อมต่อเกินเวลา 12 วินาที');alert('HiveMQ ไม่ตอบกลับ กรุณาตรวจ WebSocket Port และ Credential')}},12000);
-  }catch(e){fail('เบราว์เซอร์เปิด WebSocket ไม่ได้');alert(e.message)}
+  clearTimeout(reconnectTimer);clearTimeout(connectTimer);clearInterval(pingTimer);connected=false;compatible=false;
+  try{
+    if(socket&&socket.readyState<2){socket.onclose=null;socket.onerror=null;socket.close()}
+    const ws=new WebSocket(`wss://${HOST}:${PORT}${PATH}`,'mqtt');socket=ws;ws.binaryType='arraybuffer';let ended=false;
+    const disconnected=message=>{if(ended)return;ended=true;if(socket===ws)fail(message,true)};
+    ws.onopen=()=>{lastBrokerActivity=Date.now();ws.send(connectPacket(user,pass))};
+    ws.onmessage=e=>{lastBrokerActivity=Date.now();parseMqtt(new Uint8Array(e.data))};
+    ws.onerror=()=>{if(ws.readyState<2)ws.close()};
+    ws.onclose=()=>disconnected('การเชื่อมต่อ Dashboard ขาด');
+    connectTimer=setTimeout(()=>{if(!connected&&socket===ws){connection('HiveMQ ไม่ตอบกลับ',false);ws.close()}},12000);
+  }catch(e){fail('เบราว์เซอร์เปิด WebSocket ไม่ได้',true)}
 }
 function parseMqtt(bytes){let at=0;while(at<bytes.length){const header=bytes[at++];let multiplier=1,length=0,digit;do{if(at>=bytes.length)return;digit=bytes[at++];length+=(digit&127)*multiplier;multiplier*=128}while(digit&128);if(at+length>bytes.length)return;const end=at+length,type=header>>4;
-    if(type===2){const code=bytes[at+1];if(code!==0){const reasons={1:'Protocol ไม่ถูกต้อง',2:'Client ID ถูกปฏิเสธ',4:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',5:'ไม่มีสิทธิ์เชื่อมต่อ'};socket.close();fail(reasons[code]||('HiveMQ ปฏิเสธ รหัส '+code));alert(reasons[code]||'HiveMQ ปฏิเสธการเชื่อมต่อ');return}clearTimeout(connectTimer);connected=true;socket.send(subscribePacket());pingTimer=setInterval(()=>{if(socket.readyState===1)socket.send(new Uint8Array([0xC0,0]))},20000);connection('เชื่อมต่อ Broker แล้ว',true);document.getElementById('dashboard').classList.remove('hidden');document.getElementById('password').value=''}
+    if(type===2){const code=bytes[at+1];if(code!==0){const reasons={1:'Protocol ไม่ถูกต้อง',2:'Client ID ถูกปฏิเสธ',4:'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง',5:'ไม่มีสิทธิ์เชื่อมต่อ'},reason=reasons[code]||('HiveMQ ปฏิเสธ รหัส '+code);autoReconnect=false;savedPass='';if(socket)socket.onclose=null;if(socket)socket.close();fail(reason,false);alert(reason);return}clearTimeout(connectTimer);clearTimeout(reconnectTimer);connected=true;reconnectAttempt=0;lastBrokerActivity=Date.now();socket.send(subscribePacket());clearInterval(pingTimer);pingTimer=setInterval(()=>{if(socket&&socket.readyState===1)socket.send(new Uint8Array([0xC0,0]))},15000);connection('เชื่อมต่อ Broker แล้ว',true);document.getElementById('dashboard').classList.remove('hidden');document.getElementById('password').value=''}
     else if(type===3){let p=at;const topicLength=(bytes[p]<<8)|bytes[p+1];p+=2;const topic=decoder.decode(bytes.slice(p,p+topicLength));p+=topicLength;const qos=(header>>1)&3;if(qos>0)p+=2;onMessage(topic,decoder.decode(bytes.slice(p,end)))}at=end}}
 function messageBox(id,text,ok){const e=document.getElementById(id);e.textContent=text;e.className='message '+(ok===true?'ok':ok===false?'bad':'')}
-function sendCommand(group,action,extra={}){return new Promise((resolve,reject)=>{if(!connected||!available){messageBox(group==='manual'?'manualMessage':group==='settings'||group==='calibration'?'settingsMessage':'autoMessage','ESP32 ยังไม่ออนไลน์',false);reject(Error('ESP32 offline'));return}if(!compatible){reject(Error('Firmware ไม่ตรงกับ Dashboard v7 กรุณา Upload Full Code v28'));return}const id=Date.now().toString(36)+crypto.getRandomValues(new Uint32Array(1))[0].toString(36),body=Object.entries({id,group,action,...extra}).map(([k,v])=>k+'='+String(v)).join('&');pending.set(id,{resolve,reject,t:setTimeout(()=>{pending.delete(id);reject(Error('ESP32 ไม่ตอบกลับภายใน 10 วินาที'))},10000)});socket.send(publishPacket(COMMAND,body))})}
+function sendCommand(group,action,extra={}){return new Promise((resolve,reject)=>{if(!connected||!available){messageBox(group==='manual'?'manualMessage':group==='settings'||group==='calibration'?'settingsMessage':'autoMessage','ESP32 ยังไม่ออนไลน์',false);reject(Error('ESP32 offline'));return}if(!compatible){reject(Error('Firmware ไม่ตรงกับ Dashboard v8 กรุณา Upload Full Code v28'));return}const id=Date.now().toString(36)+crypto.getRandomValues(new Uint32Array(1))[0].toString(36),body=Object.entries({id,group,action,...extra}).map(([k,v])=>k+'='+String(v)).join('&');pending.set(id,{resolve,reject,t:setTimeout(()=>{pending.delete(id);reject(Error('ESP32 ไม่ตอบกลับภายใน 10 วินาที'))},10000)});socket.send(publishPacket(COMMAND,body))})}
 async function runCommand(group,action,extra={}){const box=group==='manual'?'manualMessage':group==='setting'?'settingsMessage':'autoMessage';messageBox(box,'กำลังส่งคำสั่ง...',null);try{const d=await sendCommand(group,action,extra);messageBox(box,d.message,true);return d}catch(e){messageBox(box,e.message,false);throw e}}
 function setManualButtons(unlocked){document.querySelectorAll('.manual-action').forEach(b=>b.disabled=!unlocked);document.getElementById('manualUnlockButton').disabled=unlocked}
 window.controlCommand=(g,a,e)=>runCommand(g,a,e).then(()=>{if(g==='manual'&&(a==='lock'||a==='alloff'))setManualButtons(false)}).catch(()=>{});
@@ -177,6 +192,23 @@ function onMessage(topic,payload){
     const events=d.events||[];document.getElementById('eventList').innerHTML=events.length?events.map(e=>`<div class="event"><span>${Math.floor(e.uptimeSec/60)} นาที</span><span class="${e.level}">${e.level}</span><span>${e.message}</span></div>`).join(''):'<div class="event"><span>--</span><span>INFO</span><span>ยังไม่มีเหตุการณ์</span></div>';
   }catch(e){console.error(e)}
 }
+statusWatchdog=setInterval(()=>{
+  if(connected&&lastBrokerActivity&&Date.now()-lastBrokerActivity>45000){
+    connection('ไม่ได้รับข้อมูลจาก Broker · กำลังเชื่อมใหม่',false);
+    if(socket&&socket.readyState<2)socket.close();
+  }
+},10000);
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState!=='visible')return;
+  if(connected&&Date.now()-lastBrokerActivity>45000){if(socket&&socket.readyState<2)socket.close();return}
+  if(!connected)scheduleReconnect('กลับมาเปิด Dashboard',true);
+  else if(socket&&socket.readyState===1)socket.send(new Uint8Array([0xC0,0]));
+});
+window.addEventListener('online',()=>scheduleReconnect('อินเทอร์เน็ตกลับมาแล้ว',true));
+window.addEventListener('offline',()=>{
+  connection('อินเทอร์เน็ตของเครื่องนี้ออฟไลน์ · รอเชื่อมใหม่',false);
+  if(socket&&socket.readyState<2)socket.close();
+});
 </script>
 </body>
 </html>
