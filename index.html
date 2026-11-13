@@ -3,18 +3,26 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Smart Farm Online v22 · PW68-206</title>
+  <title>Smart Farm Green Oak · Online Dashboard v46.1</title>
   <style>
     :root{--green:#176b40;--green2:#1e9d5d;--ink:#173629;--muted:#688074;--line:#d8e5dd;--bg:#eef6f1;--red:#d94343;--amber:#d98a16}
     *{box-sizing:border-box}body{margin:0;background:linear-gradient(145deg,#edf7f1,#f7fbf9);color:var(--ink);font-family:system-ui,"Noto Sans Thai",sans-serif}.wrap{max-width:1180px;margin:auto;padding:22px}.top{background:linear-gradient(135deg,#145d3b,#228c57);color:white;padding:25px;border-radius:22px;box-shadow:0 12px 32px #155d3b26;display:flex;gap:18px;align-items:center;justify-content:space-between}.top h1{margin:0;font-size:28px}.top p{margin:5px 0 0;opacity:.86}.badge{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:99px;background:#ffffff26;font-weight:800}.dot{width:11px;height:11px;border-radius:50%;background:#ccc}.dot.on{background:#61e39b;box-shadow:0 0 0 5px #61e39b25}.login,.section{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:16px;box-shadow:0 8px 22px #204b3210}.login{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end}.field label{display:block;color:var(--muted);font-size:13px;margin:0 0 6px}.field input,.field select{width:100%;border:1px solid #bdd2c5;border-radius:11px;padding:12px 13px;font-size:16px}.btn{border:0;border-radius:11px;padding:12px 20px;background:var(--green);color:#fff;font-weight:800;font-size:15px;cursor:pointer}.btn:disabled{opacity:.55}.note{grid-column:1/-1;color:var(--muted);font-size:13px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:16px}.card{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:0 8px 22px #204b3210}.label{font-size:14px;color:var(--muted)}.value{font-size:31px;font-weight:900;color:var(--green);margin-top:4px}.unit{font-size:14px;font-weight:700;color:var(--muted)}h2{font-size:19px;margin:0 0 14px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.data{background:#f5faf7;border-radius:12px;padding:12px}.data b{display:block;font-size:19px;margin-top:3px}.relay-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.relay{border:1px solid var(--line);border-radius:11px;padding:10px;font-weight:800}.relay.on{background:#e6f8ed;border-color:#4cab73;color:#12633b}.relay.off{color:#8a9991}.auto-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.auto{background:#f5faf7;border-radius:12px;padding:12px}.auto span{display:block;color:var(--muted);font-size:13px}.auto b{font-size:16px}.warn{color:var(--red)!important}.hidden{display:none}.foot{text-align:center;color:var(--muted);font-size:12px;padding:22px}
     .diagram{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px;margin-top:16px;box-shadow:0 8px 22px #204b3210}.diagram-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}.diagram-head h2{margin:0}.process-scroll{overflow-x:auto;border:1px solid #cfdfd4;border-radius:16px;background:linear-gradient(180deg,#eaf7fb 0,#f8fcf9 62%,#eef7e9 100%)}.process-svg{display:block;width:100%;min-width:960px;height:auto}.process-svg .pipe{fill:none;stroke:#6fc9d7;stroke-width:10;stroke-linecap:round;stroke-linejoin:round}.process-svg .pipe.flow{stroke:transparent}.process-svg .pipe.active{stroke:#1db45c;stroke-dasharray:14 9;animation:pipeFlow .8s linear infinite}.process-svg .node circle{stroke:#fff;stroke-width:4;filter:drop-shadow(0 4px 4px #163e2940)}.process-svg .node .status{fill:#d64545}.process-svg .node.on .status{fill:#1f9d55}.process-svg .node .state{fill:#fff;font-size:13px;font-weight:800;text-anchor:middle}.process-svg .node .name{fill:#173a27;font-size:15px;font-weight:800;text-anchor:middle}.process-svg .box-title{fill:#173a27;font-size:20px;font-weight:800;text-anchor:middle}.process-svg .box-value{fill:#365848;font-size:14px;font-weight:600;text-anchor:middle}.process-svg .sensor rect,.process-svg .info-panel rect,.process-svg .curtain-status rect{fill:#fff;stroke:#d64545;stroke-width:2;filter:drop-shadow(0 5px 5px #173d2525)}.process-svg .sensor.online rect{stroke:#1f9d55}.process-svg .sensor-title{fill:#183126;font-size:15px;font-weight:800}.process-svg .sensor-value{fill:#176b40;font-size:24px;font-weight:900;text-anchor:middle}.process-svg .info-panel rect{stroke:#67a67e}.process-svg .info-title{fill:#173a27;font-size:19px;font-weight:900;text-anchor:middle}.process-svg .important-value{fill:#176b40;font-size:24px;font-weight:900;text-anchor:middle}.process-svg .info-detail{fill:#50685c;font-size:11px;font-weight:600;text-anchor:middle}.process-svg .curtain-status rect{stroke:#4c8f68;fill:#f2fbf5}.process-svg .curtain-label{fill:#52675b;font-size:12px;font-weight:700;text-anchor:middle}.process-svg .curtain-value{fill:#176b40;font-size:21px;font-weight:900;text-anchor:middle}.process-svg .crop{fill:#58ad58;stroke:#24733e;stroke-width:1}.diagram-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}.strip-item{background:#f5faf7;border:1px solid var(--line);border-radius:11px;padding:10px;font-size:13px}.strip-item span{display:block;color:var(--muted);font-size:12px}.strip-item b{display:block;margin-top:3px}@keyframes pipeFlow{to{stroke-dashoffset:-23}}
     .nav{display:flex;gap:7px;overflow-x:auto;margin:16px 0 0;padding:8px;background:#fff;border:1px solid var(--line);border-radius:15px;position:sticky;top:5px;z-index:20}.nav button{white-space:nowrap;border:0;background:transparent;color:#355748;padding:10px 14px;border-radius:10px;font-weight:800;cursor:pointer}.nav button.active{background:var(--green);color:#fff}.page{display:none}.page.active{display:block}.actions{display:flex;gap:9px;flex-wrap:wrap}.danger{background:#c93636}.secondary{background:#e8f3ec;color:#155d3b}.remember{display:inline-flex;align-items:center;gap:7px;font-weight:700;color:#355748}.remember input{width:17px;height:17px}.linkbtn{border:0;background:transparent;color:#176b40;text-decoration:underline;cursor:pointer;font:inherit;margin-left:10px}.control-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}.control-card h3{margin:0 0 10px}.message{margin:12px 0;padding:11px;border-radius:10px;background:#f1f6f2;color:var(--muted)}.message.ok{background:#e7f7ed;color:#12633b}.message.bad{background:#fff0f0;color:#b52e2e}.manual-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.manual-box{border:1px solid var(--line);border-radius:13px;padding:13px}.manual-box.on{border-color:#38a768;background:#edfaf2}.manual-box b{display:block;margin-bottom:9px}.manual-box .actions{gap:6px}.manual-box .btn{padding:9px 12px}.hold{touch-action:none;user-select:none}.hold.holding{background:#d67c13}.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.settings-group{border:1px solid var(--line);border-radius:14px;padding:14px}.settings-group h3{margin:0 0 11px}.settings-fields{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.events{display:grid;gap:8px}.event{display:grid;grid-template-columns:90px 75px 1fr;gap:10px;padding:10px;background:#f5faf7;border-radius:10px}.event .FAULT{color:#bd3030;font-weight:900}.status4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.status4 .data{min-height:72px}.confirm{border:2px solid #e4a328;background:#fff9e7;padding:11px;border-radius:11px;color:#724b00;margin-bottom:12px}.process-svg .level-marker line{stroke:#8f8299;stroke-width:3}.process-svg .level-marker circle{fill:#8f9692;stroke:#fff;stroke-width:2}.process-svg .level-marker text{fill:#625b68;font-size:12px;font-weight:900;text-anchor:middle}.process-svg .level-marker.active line{stroke:#18a75a}.process-svg .level-marker.active circle{fill:#18a75a}.process-svg .level-marker.active text{fill:#12633b}.process-svg .level-marker.fault line{stroke:#d64545}.process-svg .level-marker.fault circle{fill:#d64545}.process-svg .level-marker.fault text{fill:#a32222}
     @media(max-width:800px){.metrics{grid-template-columns:repeat(2,1fr)}.grid2,.settings-grid{grid-template-columns:1fr}.login{grid-template-columns:1fr}.note{grid-column:auto}.diagram-strip,.status4{grid-template-columns:repeat(2,1fr)}.manual-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:480px){.wrap{padding:12px}.top{align-items:flex-start;flex-direction:column}.top h1{font-size:23px}.metrics,.data-grid,.relay-grid,.auto-grid,.diagram-strip,.manual-grid,.settings-fields{grid-template-columns:1fr 1fr}.value{font-size:27px}.event{grid-template-columns:70px 60px 1fr;font-size:12px}}
-  </style>
+  
+/* Online v46.1 Energy section, visually matched to Local Dashboard */
+.energy-metrics{margin-top:15px;margin-bottom:15px}
+.energy-table{width:100%;border-collapse:collapse;min-width:600px;background:#fff;border-radius:12px;overflow:hidden}
+.energy-table th,.energy-table td{padding:12px 13px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}
+.energy-table th{background:#e8f5eb;color:var(--ink);font-weight:750}
+.energy-table td:nth-child(3),.energy-table td:nth-child(4){font-variant-numeric:tabular-nums}
+.energy-table tbody tr:last-child td{border-bottom:none}
+</style>
 </head>
 <body>
 <main class="wrap">
-  <header class="top"><div><h1>🌱 Smart Farm Green Oak</h1><p>โครงงานระบบดูแลแปลงผักอัตโนมัติด้วย ESP32 · Online Monitoring</p></div><div style="display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end"><div class="badge">🕒 <span id="deviceClock">เวลา ESP32 --</span></div><div class="badge"><i id="dot" class="dot"></i><span id="connection">ยังไม่เชื่อมต่อ</span></div></div></header>
+  <header class="top"><div><h1>🌱 Smart Farm Green Oak</h1><p>โครงงานระบบดูแลแปลงผักอัตโนมัติด้วย ESP32 · Online Dashboard (รูปแบบเดียวกับ Local)</p></div><div style="display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end"><div class="badge">🕒 <span id="deviceClock">เวลา ESP32 --</span></div><div class="badge"><i id="dot" class="dot"></i><span id="connection">ยังไม่เชื่อมต่อ</span></div></div></header>
 
   <section class="login" id="loginBox">
     <div class="field"><label>ชื่อผู้ใช้ควบคุมออนไลน์</label><input id="username" value="smartfarm_admin" autocomplete="username"></div>
@@ -24,10 +32,10 @@
   </section>
 
   <div id="dashboard" class="hidden">
-    <nav class="nav"><button class="active" data-page="overview">🏠 ภาพรวม</button><button data-page="automatic">🤖 Auto</button><button data-page="manual">🎛️ Manual</button><button data-page="settings">⚙️ ตั้งค่า</button><button data-page="events">📋 ประวัติ</button></nav>
+    <nav class="nav"><button class="active" data-page="overview">🏠 ภาพรวม</button><button data-page="automatic">🤖 Auto</button><button data-page="manual">🎛️ Manual</button><button data-page="settings">⚙️ ตั้งค่า</button><button data-page="events">📋 ประวัติ</button><button data-page="energy">⚡ พลังงาน</button></nav>
     <div class="page active" id="page-overview">
     <section class="metrics">
-      <div class="card"><div class="label">แสง BH1750</div><div class="value"><span id="lux">--</span> <span class="unit">lux</span></div></div>
+      <div class="card"><div class="label">Light Sensor (SN-300AL-GH-N01)</div><div class="value"><span id="lux">--</span> <span class="unit">Lux</span></div><div class="unit">Lux estimated from PPFD sensor</div></div>
       <div class="card"><div class="label">ความชื้นแปลงควบคุม · ZTS-3002</div><div class="value"><span id="soilAverage">--</span><span class="unit">%</span></div></div>
       <div class="card"><div class="label">กำลังไฟฟ้า</div><div class="value"><span id="watts">--</span> <span class="unit">W</span></div></div>
     </section>
@@ -89,13 +97,69 @@
 
     <div class="page" id="page-settings">
       <section class="section"><h2>ตั้งค่าระบบ</h2><div class="confirm">กดบันทึกแล้วค่าจะถูกส่งทีละรายการและบันทึกถาวรใน ESP32 ห้ามปิดหน้าเว็บระหว่างบันทึก</div><form id="settingsForm"><div id="settingsGroups" class="settings-grid"></div><div class="actions" style="margin-top:14px"><button class="btn" type="submit">บันทึกค่าทั้งหมด</button></div><div id="settingsMessage" class="message">รอข้อมูลจาก ESP32</div></form></section>
+
+<section class="section" id="onlineEnergyTariffPanel">
+  <h2>⚡ ตั้งค่าอัตราค่าไฟฟ้า (Energy Monitor)</h2>
+  <p class="label">แสดงอัตราที่ ESP32 ใช้คำนวณค่าไฟจริง ตรงกับ Local Dashboard</p>
+  <div class="settings-fields" style="max-width:550px">
+    <div class="field"><label>อัตราค่าไฟ (บาท/kWh)</label><div class="data"><b id="remoteTariff">-- บาท/หน่วย</b></div></div>
+    <div class="field"><label>ค่าไฟวันนี้ (ประมาณ)</label><div class="data"><b id="remoteCostToday">-- บาท</b></div></div>
+  </div>
+  <div class="message">การเปลี่ยนอัตราค่าไฟใน Firmware v46.1 ต้องทำจาก Local Dashboard → ตั้งค่า → ค่าไฟ เนื่องจาก MQTT ยังไม่มีคำสั่งบันทึกอัตราค่าไฟโดยตรง</div>
+</section>
     </div>
 
     <div class="page" id="page-events"><section class="section"><div class="diagram-head"><h2>ประวัติเหตุการณ์ล่าสุด</h2><button class="btn danger" onclick="controlCommand('auto','clear_events')">ล้างประวัติ</button></div><div id="eventList" class="events"><div class="event"><span>--</span><span>INFO</span><span>ยังไม่มีข้อมูล</span></div></div></section></div>
+
+<div class="page" id="page-energy">
+  <section class="section">
+    <div class="diagram-head"><h2>⚡ Energy Monitor</h2><b id="energyMeterState">รอข้อมูล</b></div>
+    <p class="label">ค่ารวมจาก KWS-303L เป็นข้อมูลวัดจริงเมื่อมิเตอร์เชื่อมต่อ ส่วนรายอุปกรณ์เป็นการคำนวณจากรีเลย์และกำลังไฟที่ตั้งไว้</p>
+    <div class="metrics energy-metrics">
+      <div class="card"><div class="label">กำลังไฟขณะนี้ (KWS-303L)</div><div class="value"><span id="emPower">--</span> <span class="unit">W</span></div></div>
+      <div class="card"><div class="label">พลังงานวันนี้</div><div class="value"><span id="emToday">--</span> <span class="unit">kWh</span></div></div>
+      <div class="card"><div class="label">ค่าไฟวันนี้ (ประมาณ)</div><div class="value"><span id="emCost">--</span> <span class="unit">฿</span></div></div>
+    </div>
+    <div class="data">อัตราค่าไฟปัจจุบัน <b id="emRate">-- บาท/kWh</b></div>
+    <div class="data">คิวรายการรอส่ง Google Sheets <b id="emQueue">--</b></div>
+    <div class="data">สถานะการส่ง Google Sheets <b id="emUpload">--</b></div>
+    <h3>เวลาทำงานและพลังงานรายอุปกรณ์ (วันนี้)</h3>
+    <div class="process-scroll">
+      <table class="energy-table"><thead><tr><th>รีเลย์</th><th>อุปกรณ์</th><th>เวลาทำงาน</th><th>พลังงานประมาณ</th></tr></thead><tbody id="emEquipmentRows"><tr><td colspan="4">รอข้อมูล ESP32</td></tr></tbody></table>
+    </div>
+    <p class="label" style="margin-top:14px">ข้อมูลนี้รับจาก MQTT Snapshot ของ ESP32 โดยตรง ไม่ต้องเข้าวง LAN ข้อมูลย้อนหลังแบบเต็มดูได้ใน Google Sheets</p>
+  </section>
+</div>
   </div>
-  <div class="foot">ข้อมูลล่าสุด: <span id="lastUpdate">ยังไม่มีข้อมูลสด</span> · Firmware: <span id="firmwareVersion">--</span> · Online Dashboard v30 · คำสั่งควบคุมส่งผ่าน MQTT TLS</div>
+  <div class="foot">ข้อมูลล่าสุด: <span id="lastUpdate">ยังไม่มีข้อมูลสด</span> · Firmware: <span id="firmwareVersion">--</span> · Online Dashboard v46.1 · รูปแบบเดียวกับ Local · MQTT TLS</div>
 </main>
 <script>
+
+// Read-only energy telemetry. No new MQTT control operations or relay writes.
+const energyRelayNames=['P1 ปั๊มน้ำหลัก','P2 ปั๊มปุ๋ย','V1 วาล์วน้ำสะอาด','V2 วาล์วจ่ายปุ๋ย','V3 วาล์วแปลงทั่วไป','V4 วาล์วแปลงควบคุม','V5 วาล์วเติมถัง','มอเตอร์เปิดม่าน','มอเตอร์ปิดม่าน'];
+function energyText(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+function energyDisplay(value,digits=2){return Number.isFinite(Number(value))?Number(value).toFixed(digits):'--';}
+function updateEnergyMonitor(snapshot){
+  const em=snapshot&&snapshot.energyMonitor;
+  if(!em){energyText('energyMeterState','ยังไม่มีข้อมูล Energy Monitor');return;}
+  const isValid=em.meterValidated===true;
+  energyText('energyMeterState',isValid?'มิเตอร์พร้อม':'รอ KWS-303L');
+  energyText('emPower',isValid?energyDisplay(snapshot.power?.watts,1):'--');
+  energyText('emToday',isValid?energyDisplay(em.meterTodayKwh,3):'--');
+  energyText('emCost',isValid?energyDisplay(em.estimatedCostBaht,2):'--');
+  energyText('emRate',energyDisplay(em.bahtPerKwh,2)+' บาท/kWh');
+  energyText('remoteTariff',energyDisplay(em.bahtPerKwh,2)+' บาท/หน่วย');
+  energyText('remoteCostToday',isValid?energyDisplay(em.estimatedCostBaht,2)+' บาท':'รอมิเตอร์');
+  energyText('emQueue',Number.isInteger(em.queueDepth)?String(em.queueDepth):'--');
+  energyText('emUpload',String(em.uploadStatus??'--'));
+  const rows=document.getElementById('emEquipmentRows');
+  if(rows){
+    const times=Array.isArray(em.runtimeSec)?em.runtimeSec:[];
+    const estimates=Array.isArray(em.estimatedKwh)?em.estimatedKwh:[];
+    rows.innerHTML=energyRelayNames.map((name,i)=>'<tr><td>R'+(i+2)+'</td><td>'+name+'</td><td>'+ (Number.isFinite(Number(times[i]))? (Number(times[i])/60).toFixed(1)+' นาที':'--') +'</td><td>'+(Number.isFinite(Number(estimates[i]))?Number(estimates[i]).toFixed(4)+' kWh':'--')+'</td></tr>').join('');
+  }
+}
+
 const HOST='95a45c625a3a4147a36929d2a1c2d4c4.s1.eu.hivemq.cloud',PORT=8884,PATH='/mqtt';
 const STATUS='smartfarm/device01/status',AVAIL='smartfarm/device01/availability',COMMAND='smartfarm/device01/command',ACK='smartfarm/device01/ack';
 const LOGIN_STORAGE_KEY='smartfarm-device01-mqtt-login-v1';
@@ -193,7 +257,7 @@ function onMessage(topic,payload,retained=false){
   if(topic===AVAIL){availabilityOnline=payload==='online';if(!availabilityOnline){lastDeviceStatusAt=0;settingsLoaded=false;rejectPending()}refreshDeviceAvailability();return}
   if(topic===ACK){try{const d=JSON.parse(payload),p=pending.get(d.id);if(p){clearTimeout(p.t);pending.delete(d.id);d.ok?p.resolve(d):p.reject(Error(d.message||'คำสั่งไม่สำเร็จ'))}}catch(e){console.error(e)}return}
   if(topic!==STATUS)return;
-  try{const d=JSON.parse(payload);compatible=d.schema===3&&['v45','v46'].includes(d.firmware);if(!retained)lastDeviceStatusAt=Date.now();txt('firmwareVersion',d.firmware||'รุ่นเก่า');lastData=d;txt('deviceClock',d.clock?.synced?'เวลา ESP32 '+d.clock.thailand:'เวลา ESP32 รอ NTP');if(!compatible){refreshDeviceAvailability();messageBox('autoMessage','กรุณา Upload Full Code v45 ให้ ESP32',false);messageBox('manualMessage','กรุณา Upload Full Code v45 ให้ ESP32',false);messageBox('settingsMessage','กรุณา Upload Full Code v45 ให้ ESP32',false);return}
+  try{const d=JSON.parse(payload);compatible=d.schema===3&&['v45','v46'].includes(d.firmware);if(!retained)lastDeviceStatusAt=Date.now();txt('firmwareVersion',d.firmware||'รุ่นเก่า');lastData=d;updateEnergyMonitor(d);txt('deviceClock',d.clock?.synced?'เวลา ESP32 '+d.clock.thailand:'เวลา ESP32 รอ NTP');if(!compatible){refreshDeviceAvailability();messageBox('autoMessage','โปรดใช้ Firmware ที่รองรับ schema 3 (v45 หรือ v46)',false);messageBox('manualMessage','โปรดใช้ Firmware ที่รองรับ schema 3 (v45 หรือ v46)',false);messageBox('settingsMessage','โปรดใช้ Firmware ที่รองรับ schema 3 (v45 หรือ v46)',false);return}
     txt('lux',d.light.valid?Number(d.light.lux).toLocaleString('th-TH'):'--');txt('soilAverage',d.zts.valid?d.zts.moisture:'--');txt('watts',d.power.valid?d.power.watts:'--');
     txt('temp',d.zts.valid?d.zts.temperature+' °C':'--');txt('zmoist',d.zts.valid?d.zts.moisture+' %':'--');txt('ec',d.zts.valid?d.zts.ec+' µS/cm':'--');txt('ph',d.zts.valid?d.zts.ph:'--');txt('npk',d.zts.valid?`${d.zts.n} / ${d.zts.p} / ${d.zts.k}`:'-- / -- / --');txt('ztsStatus',d.zts.valid?'ออนไลน์':'ออฟไลน์');
     txt('voltage',d.power.valid?d.power.voltage+' V':'--');txt('current',d.power.valid?d.power.current+' A':'--');txt('energy',d.power.valid?d.power.energy+' kWh':'--');txt('mix',({EMPTY:'น้ำหมด',LOW:'ระดับ LOW',FULL:'เต็ม',SENSOR_FAULT:'เซนเซอร์ผิดปกติ'})[d.contacts.mix]||d.contacts.mix);txt('mode',d.mode);
